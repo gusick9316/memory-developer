@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>충주상업고등학교 5기 - 스마트IT들의 추억</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+    
+    <!-- 성능 최적화 메타 태그 -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="충상고등학교 스마트 5기 추억 저장소">
+    <link rel="preconnect" href="https://api.github.com">
+    <link rel="preconnect" href="https://raw.githubusercontent.com">
+    <link rel="dns-prefetch" href="//api.github.com">
+    <link rel="dns-prefetch" href="//raw.githubusercontent.com">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+    <!-- 비밀코드 입력 화면 -->
+    <div id="auth-screen" class="screen active">
+        <div class="auth-container">
+            <h1>학교 추억 저장소</h1>
+            <div class="auth-form">
+                <input type="password" id="secret-code" placeholder="비밀코드를 입력하세요" />
+                <button id="auth-submit">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 화면 -->
+    <div id="loading-screen" class="screen">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div id="loading-text">추억에 연결하는중...</div>
+        </div>
+    </div>
+
+    <!-- 메인 화면 -->
+    <div id="main-screen" class="screen">
+        <header class="main-header">
+            <h1>충주상업고등학교 5기</h1>
+            <p>스마트IT들의 추억</p>
+        </header>
+
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="memories">추억</button>
+            <button class="tab-btn" data-tab="students">학생목록</button>
+            <button class="tab-btn" data-tab="developers">개발자</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- 추억 탭 -->
+            <div id="memories-tab" class="tab-content active">
+                <div class="tab-header">
+                    <button id="add-memory-btn" class="add-btn">
+                        작성
+                        <div class="storage-info">
+                            <span>저장소 용량: <span id="storage-usage">0MB</span> / 1000MB</span>
+                        </div>
+                    </button>
+                </div>
+                <div id="memories-list" class="content-list"></div>
+            </div>
+
+            <!-- 학생목록 탭 -->
+            <div id="students-tab" class="tab-content">
+                <div class="tab-header">
+                    <button id="add-student-btn" class="add-btn">작성</button>
+                </div>
+                <div id="students-list" class="content-list album-view"></div>
+            </div>
+
+            <!-- 개발자 탭 -->
+            <div id="developers-tab" class="tab-content">
+                <div class="tab-header">
+                    <button id="add-developer-btn" class="add-btn">작성</button>
+                </div>
+                <div id="developers-list" class="content-list album-view"></div>
+                <div class="music-controls">
+                    <button id="music-toggle" class="music-btn active">🎵</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 모달 창들 -->
+    <div id="modal-overlay" class="modal-overlay">
+        <!-- 추억 추가/수정 모달 -->
+        <div id="memory-modal" class="modal">
+            <div class="modal-content">
+                <h3 id="memory-modal-title">추억 추가</h3>
+                <button class="modal-close">&times;</button>
+                <form id="memory-form">
+                    <input type="text" id="memory-title" placeholder="제목" required />
+                    <input type="text" id="memory-author" placeholder="작성자명" required />
+                    <div class="date-inputs">
+                        <input type="number" id="memory-year" placeholder="년도" min="2000" max="2030" required />
+                        <input type="number" id="memory-month" placeholder="월" min="1" max="12" required />
+                        <input type="number" id="memory-day" placeholder="일" min="1" max="31" required />
+                    </div>
+                    <div class="file-upload">
+                        <input type="file" id="memory-image" accept="image/*" required />
+                        <label for="memory-image">사진 선택 (최대 10MB)</label>
+                    </div>
+                    <div class="image-preview" id="memory-image-preview"></div>
+                    <div class="modal-buttons">
+                        <button type="submit">추가</button>
+                        <button type="button" id="memory-cancel">취소</button>
+                        <button type="button" id="memory-delete" class="delete-btn" style="display: none;">삭제</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 학생 추가/수정 모달 -->
+        <div id="student-modal" class="modal">
+            <div class="modal-content">
+                <h3 id="student-modal-title">학생 추가</h3>
+                <button class="modal-close">&times;</button>
+                <form id="student-form">
+                    <input type="text" id="student-name" placeholder="이름&제목" required />
+                    <select id="student-type" required>
+                        <option value="">선택하세요</option>
+                        <option value="student">학생</option>
+                        <option value="teacher">선생님</option>
+                    </select>
+                    <div class="file-upload">
+                        <input type="file" id="student-image" accept="image/*" required />
+                        <label for="student-image">사진 선택 (최대 10MB)</label>
+                    </div>
+                    <div class="image-preview" id="student-image-preview"></div>
+                    <div class="modal-buttons">
+                        <button type="submit">추가</button>
+                        <button type="button" id="student-cancel">취소</button>
+                        <button type="button" id="student-delete" class="delete-btn" style="display: none;">삭제</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 개발자 추가/수정 모달 -->
+        <div id="developer-modal" class="modal">
+            <div class="modal-content">
+                <h3 id="developer-modal-title">개발자 추가</h3>
+                <button class="modal-close">&times;</button>
+                <form id="developer-form">
+                    <input type="text" id="developer-name" placeholder="이름&제목" required />
+                    <div class="file-upload">
+                        <input type="file" id="developer-image" accept="image/*" required />
+                        <label for="developer-image">사진 선택 (최대 10MB)</label>
+                    </div>
+                    <div class="image-preview" id="developer-image-preview"></div>
+                    <div class="modal-buttons">
+                        <button type="submit">추가</button>
+                        <button type="button" id="developer-cancel">취소</button>
+                        <button type="button" id="developer-delete" class="delete-btn" style="display: none;">삭제</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 오디오 요소 -->
+    <audio id="background-music" loop>
+        <source src="" type="audio/mpeg">
+    </audio>
+
+    <!-- 네트워크 상태 표시 -->
+    <div id="network-status" class="network-status online" style="display: none;">
+        온라인
+    </div>
+
+    <!-- 성능 모니터 (개발용) -->
+    <div id="performance-monitor" class="performance-monitor hidden">
+        <div>메모리: <span id="memory-usage">-</span></div>
+        <div>캐시: <span id="cache-stats">-</span></div>
+        <div>API: <span id="api-stats">-</span></div>
+    </div>
+
+    <script src="js/github-api.js"></script>
+    <script src="js/image-optimizer.js"></script>
+    <script src="js/api-optimizer.js"></script>
+    <script src="js/cache-manager.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/memories.js"></script>
+    <script src="js/students.js"></script>
+    <script src="js/developers.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
